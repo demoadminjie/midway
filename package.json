@@ -1,0 +1,25 @@
+{
+  "name": "midway",
+  "version": "1.0.0",
+  "description": "midway websocket server",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/demoadminjie/midway.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/demoadminjie/midway/issues"
+  },
+  "homepage": "https://github.com/demoadminjie/midway#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ws": "^8.13.0"
+  }
+}
