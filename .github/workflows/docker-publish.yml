@@ -1,0 +1,65 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  TENCENT_JP_TCR: jpccr.ccs.tencentyun.com
+  TENCENT_JP_TCR_URL: jpccr.ccs.tencentyun.com/next/next-indicators
+  DOCKER_IMAGE: next-indicators
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Build
+    - name: Build Docker image
+      run: |
+        docker build -t ${TENCENT_JP_TCR_URL}:${GITHUB_SHA} .
+
+    - name: Login TKE Registry
+      run: |
+        docker login -u ${{ secrets.TENCENT_TCR_USERNAME }} -p '${{ secrets.TENCENT_TCR_PASSWORD }}' ${TENCENT_JP_TCR_URL}
+
+    # Push the Docker image to TKE Registry
+    - name: Publish
+      run: |
+        docker push ${TENCENT_JP_TCR_URL}:${GITHUB_SHA}
+        docker logout
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ssh remote deploy
+      uses: appleboy/ssh-action@v0.1.7
+      env:
+        SHA: ${{ github.sha }}
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        envs: TENCENT_JP_TCR, TENCENT_JP_TCR_URL, DOCKER_IMAGE, SHA
+        script: |
+          cd /
+          echo -e "1.docker login start==>"
+          echo ${{ secrets.TENCENT_TCR_PASSWORD }} | docker login $TENCENT_JP_TCR --username=${{ secrets.TENCENT_TCR_USERNAME }} --password-stdin
+          echo -e "2.docker stop $DOCKER_IMAGE container==>"
+          docker container stop $DOCKER_IMAGE
+          echo -e "3.docker conatainer rm==>"
+          docker container rm $DOCKER_IMAGE
+          echo -e "4.docker pull==>"
+          docker pull $TENCENT_JP_TCR_URL:$SHA
+          echo -e "5.docker container create and start==>"
+          docker container run -d -p ${{ secrets.PORT }}:3000 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA
+          echo -e "6.docker logout==>"
+          docker logout
