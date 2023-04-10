@@ -3,12 +3,10 @@ import { WebSocketServer, WebSocket } from 'ws';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const { MID_WAY_PORT, LSTM_SERVER_URL } = process.env;
-
-const wss = new WebSocketServer({ port: MID_WAY_PORT });
+const wss = new WebSocketServer({ port: process.env.MID_WAY_PORT });
 
 wss.on('connection', (ws)=> {
-  const serverSocket = new WebSocket(`ws://${LSTM_SERVER_URL}`);
+  const serverSocket = new WebSocket(`ws://${process.env.LSTM_SERVER_URL}`);
 
   serverSocket.addEventListener('open', () => {
     console.log('Connected to server');

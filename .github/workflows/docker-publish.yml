@@ -10,7 +10,7 @@ on:
 env:
   TENCENT_JP_TCR: jpccr.ccs.tencentyun.com
   TENCENT_JP_TCR_URL: jpccr.ccs.tencentyun.com/next/next-indicators
-  DOCKER_IMAGE: next-indicators
+  DOCKER_IMAGE: midway
 
 jobs:
 
@@ -50,7 +50,7 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         envs: TENCENT_JP_TCR, TENCENT_JP_TCR_URL, DOCKER_IMAGE, SHA
         script: |
-          cd /
+          cd ./$DOCKER_IMAGE
           echo -e "1.docker login start==>"
           echo ${{ secrets.TENCENT_TCR_PASSWORD }} | docker login $TENCENT_JP_TCR --username=${{ secrets.TENCENT_TCR_USERNAME }} --password-stdin
           echo -e "2.docker stop $DOCKER_IMAGE container==>"
@@ -59,7 +59,9 @@ jobs:
           docker container rm $DOCKER_IMAGE
           echo -e "4.docker pull==>"
           docker pull $TENCENT_JP_TCR_URL:$SHA
-          echo -e "5.docker container create and start==>"
-          docker container run -d -p ${{ secrets.PORT }}:3000 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA
-          echo -e "6.docker logout==>"
+          echo -e "5.create env file"
+          echo "${{ secrets.ENV_FILE }}" > .env
+          echo -e "6.docker container create and start==>"
+          docker container run --env-file .env -d -p 3001:3001 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA
+          echo -e "7.docker logout==>"
           docker logout
