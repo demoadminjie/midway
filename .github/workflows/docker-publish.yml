@@ -62,6 +62,6 @@ jobs:
           echo -e "5.create env file"
           echo "${{ secrets.ENV_FILE }}" > .env
           echo -e "6.docker container create and start==>"
-          docker container run --env-file .env -d -p 3001:3001 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA
+          docker container run --env-file .env -d -p 3001:3001 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA --link lstm-node
           echo -e "7.docker logout==>"
           docker logout
