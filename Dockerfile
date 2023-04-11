@@ -35,4 +35,6 @@ EXPOSE 3001
 
 ENV PORT 3001
 
-CMD ["node", "index.js"]
+RUN npm install pm2 -g
+
+CMD ["pm2-runtime", "index.js"]
