@@ -15,12 +15,17 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+ENV NPM_CONFIG_PREFIX=/app/.npm-global
+
+ENV PATH=$PATH:/app/.npm-global/bin
+
+RUN npm install pm2 -g
 
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -34,7 +39,5 @@ USER nextjs
 EXPOSE 3001
 
 ENV PORT 3001
-
-RUN npm install pm2 -g
 
 CMD ["pm2-runtime", "index.js"]
