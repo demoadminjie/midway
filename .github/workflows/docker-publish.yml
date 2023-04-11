@@ -53,15 +53,19 @@ jobs:
           cd ./$DOCKER_IMAGE
           echo -e "1.docker login start==>"
           echo ${{ secrets.TENCENT_TCR_PASSWORD }} | docker login $TENCENT_JP_TCR --username=${{ secrets.TENCENT_TCR_USERNAME }} --password-stdin
-          echo -e "2.docker stop $DOCKER_IMAGE container==>"
+          echo -e "2.docker disconnect $DOCKER_IMAGE container==>"
+          docker network disconnect bridge $DOCKER_IMAGE
+          echo -e "3.docker stop $DOCKER_IMAGE container==>"
           docker container stop $DOCKER_IMAGE
-          echo -e "3.docker conatainer rm==>"
+          echo -e "4.docker conatainer rm==>"
           docker container rm $DOCKER_IMAGE
-          echo -e "4.docker pull==>"
+          echo -e "5.docker pull==>"
           docker pull $TENCENT_JP_TCR_URL:$SHA
-          echo -e "5.create env file"
+          echo -e "6.create env file"
           echo "${{ secrets.ENV_FILE }}" > .env
-          echo -e "6.docker container create and start==>"
-          docker container run --env-file .env -d -p 3001:3001 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA --link lstm-node
-          echo -e "7.docker logout==>"
+          echo -e "7.docker container create and start==>"
+          docker container run --env-file .env -d -p 3001:3001 --name $DOCKER_IMAGE $TENCENT_JP_TCR_URL:$SHA
+          echo -e "8.docker container connet custome bridge==>"
+          docker network connect ${{ secrets.CUSTOME_BRIDGE }} $DOCKER_IMAGE
+          echo -e "9.docker logout==>"
           docker logout
