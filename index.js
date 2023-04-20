@@ -61,6 +61,7 @@ wss.on('connection', async (ws, upgradeReq)=> {
     }
     if (data.includes('Predicted')) {
       ws.close();
+      serverSockets.delete(socketId);
     }
   }
 
@@ -68,6 +69,7 @@ wss.on('connection', async (ws, upgradeReq)=> {
 
   serverSocket.addEventListener('close', () => {
     console.log('Disconnected from server');
+    serverSockets.delete(socketId);
   });
 
   ws.on('message', (data) => {
