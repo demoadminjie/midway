@@ -53,11 +53,11 @@ wss.on('connection', async (ws, upgradeReq)=> {
 
     if (epochMatch) {
       const epoch = parseInt(epochMatch[1]);
-      // if (epoch === 999) {
-      //   ws.close();
-      // }
-    // } else if (data.includes('Predicted')) {
-    //   ws.close();
+      if (epoch === 999) {
+        ws.close();
+      }
+    } else if (data.includes('Predicted')) {
+      ws.close();
     }
     if (data.includes('Predicted')) {
       ws.close();
